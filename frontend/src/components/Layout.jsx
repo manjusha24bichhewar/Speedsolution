@@ -24,15 +24,22 @@ export default function Layout({ children }) {
         setUser(null);
         return;
       }
+
       try {
         const data = await api.getProfile();
         setUser(data.user);
         localStorage.setItem('speed_solution_user', JSON.stringify(data.user));
       } catch (error) {
-        clearAuthSession();
-        setUser(null);
+        console.error('Profile sync failed:', error);
+
+        // Only log out if backend clearly says token is invalid/expired
+        if (error.status === 401) {
+          clearAuthSession();
+          setUser(null);
+        }
       }
     }
+
     syncUser();
   }, [user?.id]);
 
